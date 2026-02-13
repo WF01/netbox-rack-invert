@@ -1,17 +1,11 @@
 # NetBox Rack Inverter
-![Header](https://i.imgur.com/a/epL0o58.gif)
+![header](https://raw.githubusercontent.com/free-whiteboard-online/Free-Erasorio-Alternative-for-Collaborative-Design/ffe094ad1d3ac054adccb854631a82ec5816ddd7/uploads/2026-02-13T14-26-33-645Z-t3g8wjwee.gif)
 
 `netbox-rack-inverter` flips rack numbering direction (`ascending <-> descending`) while preserving physical layout.
 
 ## Usage
-![usage](https://i.imgur.com/nNtHdQW.gif)
 
-![[test]([https://i.imgur.com/nNtHdQW.gif](https://i.imgur.com/nNtHdQW.gif))](https://i.imgur.com/nNtHdQW.gif)
-
-<img>https://i.imgur.com/nNtHdQW.gif</img>
-
- <img src="https://i.imgur.com/nNtHdQW.gif" width="800" />
-
+![header](https://raw.githubusercontent.com/free-whiteboard-online/Free-Erasorio-Alternative-for-Collaborative-Design/41a949c9c76ba03c2681d6810038890ea0c74264/uploads/2026-02-13T14-27-29-566Z-st51dm5t5.gif)
  
 
 ## Scope
