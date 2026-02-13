@@ -6,8 +6,8 @@
 
 ![header](https://raw.githubusercontent.com/free-whiteboard-online/Free-Erasorio-Alternative-for-Collaborative-Design/41a949c9c76ba03c2681d6810038890ea0c74264/uploads/2026-02-13T14-27-29-566Z-st51dm5t5.gif)
 
- Largely untested, use at your own risk on dummy data, feel free to add features / report bugs (and fix them) etc.
- High potential for unintended affects due to AI slop.
+ - Largely untested, use at your own risk on dummy data, feel free to add features / report bugs (and fix them) etc.
+ - High potential for unintended affects due to AI slop.
 
 ## Scope
 
