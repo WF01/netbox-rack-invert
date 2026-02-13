@@ -1,6 +1,18 @@
 # NetBox Rack Inverter
+![Header](https://i.imgur.com/a/epL0o58.gif)
 
 `netbox-rack-inverter` flips rack numbering direction (`ascending <-> descending`) while preserving physical layout.
+
+## Usage
+![usage](https://i.imgur.com/nNtHdQW.gif)
+
+![[test]([https://i.imgur.com/nNtHdQW.gif](https://i.imgur.com/nNtHdQW.gif))](https://i.imgur.com/nNtHdQW.gif)
+
+<img>https://i.imgur.com/nNtHdQW.gif</img>
+
+ <img src="https://i.imgur.com/nNtHdQW.gif" width="800" />
+
+ 
 
 ## Scope
 
