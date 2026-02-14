@@ -46,7 +46,7 @@ The action is designed to be safe and non-destructive, but any bulk positional c
 
 ## Compatibility
 
-- Plugin: `0.1.2`
+- Plugin: `0.1.3`
 - NetBox: `4.5.x`
 - Python: `3.12+`
 
@@ -55,7 +55,7 @@ The action is designed to be safe and non-destructive, but any bulk positional c
 ### Option A (recommended): install from a pinned release tag
 
 ```bash
-<NETBOX_VENV_PYTHON> -m pip install "git+https://github.com/WF01/netbox-rack-invert@v0.1.2"
+<NETBOX_VENV_PYTHON> -m pip install "git+https://github.com/WF01/netbox-rack-invert@v0.1.3"
 ```
 
 ### Option B: install from `main`
@@ -111,7 +111,7 @@ Use a plugin Dockerfile and install from Git:
 
 ```dockerfile
 FROM netboxcommunity/netbox:v4.5-4.0.0
-RUN /usr/local/bin/uv pip install "git+https://github.com/WF01/netbox-rack-invert@v0.1.2"
+RUN /usr/local/bin/uv pip install "git+https://github.com/WF01/netbox-rack-invert@v0.1.3"
 ```
 
 Then rebuild and start:
@@ -133,7 +133,7 @@ python -m build
 Install wheel:
 
 ```bash
-<NETBOX_VENV_PYTHON> -m pip install /path/to/netbox_rack_inverter-0.1.2-py3-none-any.whl
+<NETBOX_VENV_PYTHON> -m pip install /path/to/netbox_rack_inverter-0.1.3-py3-none-any.whl
 ```
 
 Then enable the plugin and run migrations as shown above.
