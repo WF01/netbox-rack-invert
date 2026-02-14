@@ -1,10 +1,13 @@
 ![header](https://raw.githubusercontent.com/free-whiteboard-online/Free-Erasorio-Alternative-for-Collaborative-Design/ffe094ad1d3ac054adccb854631a82ec5816ddd7/uploads/2026-02-13T14-26-33-645Z-t3g8wjwee.gif)
 
-`netbox-rack-inverter` flips rack numbering direction (`ascending <-> descending`) while preserving physical rack layout.
+`netbox-rack-inverter` flips rack numbering direction (`ascending <-> descending`) while preserving physical rack layout (i.e., reorders devices to maintain their 'physical location'
 
 ## Demo
 
 ![header](https://raw.githubusercontent.com/free-whiteboard-online/Free-Erasorio-Alternative-for-Collaborative-Design/41a949c9c76ba03c2681d6810038890ea0c74264/uploads/2026-02-13T14-27-29-566Z-st51dm5t5.gif)
+
+Allows rack inversion through transforming device (RUs) - designed to work with all RU / rack sizes.
+Largely untested - please use at your own risk; tested on a local docker instance without issue.
 
 ## What It Does
 
@@ -17,6 +20,19 @@ When toggled, it updates:
 - `RackReservation.units`
 
 No objects are recreated. IDs, relationships, tags, and custom fields remain intact.
+
+## Caveats
+
+This plugin is intentionally narrow: it only toggles rack unit orientation and remaps `Device.position` plus `RackReservation.units` to preserve physical placement.
+
+Before using in production:
+
+- Test on dummy/non-production data first
+- Back up your NetBox database
+- Verify the acting user has all required permissions (including object-level permissions)
+- Validate rack data quality (invalid existing positions/reservations will cause safe aborts)
+
+The action is designed to be safe and non-destructive, but any bulk positional change should still be treated as an operational change.
 
 ## Safety Guarantees
 
@@ -165,19 +181,6 @@ Run the full plugin suite:
 ```
 
 Latest verified run (February 14, 2026): `46 passed, 0 failed`.
-
-## Caveats
-
-This plugin is intentionally narrow: it only toggles rack unit orientation and remaps `Device.position` plus `RackReservation.units` to preserve physical placement.
-
-Before using in production:
-
-- Test on dummy/non-production data first
-- Back up your NetBox database
-- Verify the acting user has all required permissions (including object-level permissions)
-- Validate rack data quality (invalid existing positions/reservations will cause safe aborts)
-
-The action is designed to be safe and non-destructive, but any bulk positional change should still be treated as an operational change.
 
 ## License
 
