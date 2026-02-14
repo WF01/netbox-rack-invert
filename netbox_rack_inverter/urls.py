@@ -2,7 +2,7 @@
 URL patterns for Netbox Rack Inverter.
 
 For more information on URL routing, see:
-https://docs.netbox.dev/en/stable/plugins/development/views/#url-registration
+https://netboxlabs.com/docs/netbox/plugins/development/views/
 
 For Django URL patterns, see:
 https://docs.djangoproject.com/en/stable/topics/http/urls/
@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/stable/topics/http/urls/
 from django.urls import path
 
 from . import views
+
+app_name = "netbox_rack_inverter"
 
 urlpatterns = (
     path(

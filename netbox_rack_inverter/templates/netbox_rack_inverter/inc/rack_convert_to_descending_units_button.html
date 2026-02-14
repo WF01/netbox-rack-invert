@@ -1,10 +1,24 @@
-<form action="{{ action_url }}" method="post" class="d-inline">
-  {% csrf_token %}
+{% if disabled %}
   <button
-    type="submit"
-    class="btn {% if rack.desc_units %}btn-primary{% else %}btn-warning{% endif %}"
-    onclick="return confirm('{% if rack.desc_units %}Switch to ascending units{% else %}Switch to descending units{% endif %} while preserving current physical placement for all mounted devices and reservations?');"
+    type="button"
+    class="btn btn-secondary"
+    disabled
+    data-bs-toggle="tooltip"
+    data-bs-placement="top"
+    title="{{ permission_issue }}"
+    aria-label="{{ permission_issue }}"
   >
     {% if rack.desc_units %}Switch to Ascending Units{% else %}Switch to Descending Units{% endif %}
   </button>
-</form>
+{% else %}
+  <form action="{{ action_url }}" method="post" class="d-inline">
+    {% csrf_token %}
+    <button
+      type="submit"
+      class="btn {% if rack.desc_units %}btn-primary{% else %}btn-warning{% endif %}"
+      onclick="return confirm('{% if rack.desc_units %}Switch to ascending units{% else %}Switch to descending units{% endif %} while preserving current physical placement for all mounted devices and reservations?');"
+    >
+      {% if rack.desc_units %}Switch to Ascending Units{% else %}Switch to Descending Units{% endif %}
+    </button>
+  </form>
+{% endif %}

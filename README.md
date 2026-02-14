@@ -1,51 +1,31 @@
 ![header](https://raw.githubusercontent.com/free-whiteboard-online/Free-Erasorio-Alternative-for-Collaborative-Design/ffe094ad1d3ac054adccb854631a82ec5816ddd7/uploads/2026-02-13T14-26-33-645Z-t3g8wjwee.gif)
 
-`netbox-rack-inverter` flips rack numbering direction (`ascending <-> descending`) while preserving physical layout.
+`netbox-rack-inverter` flips rack numbering direction (`ascending <-> descending`) while preserving physical rack layout.
 
-## Usage
+## Demo
 
 ![header](https://raw.githubusercontent.com/free-whiteboard-online/Free-Erasorio-Alternative-for-Collaborative-Design/41a949c9c76ba03c2681d6810038890ea0c74264/uploads/2026-02-13T14-27-29-566Z-st51dm5t5.gif)
 
- - Largely untested, use at your own risk on dummy data, feel free to add features / report bugs (and fix them) etc.
- - High potential for unintended affects due to AI slop.
+## What It Does
 
-## Scope
+This plugin adds one action button on rack detail pages (`/dcim/racks/<id>/`) to toggle rack unit order while preserving physical placement.
 
-This plugin is intentionally narrow:
-
-- It adds a single action button on rack detail pages only (`/dcim/racks/<id>/`).
-- It does not expose standalone plugin CRUD pages.
-- It does not expose standalone plugin API endpoints.
-
-## Behavior
-
-When toggled, the plugin:
-
-1. Flips `Rack.desc_units`.
-2. Remaps mounted `Device.position` values.
-3. Remaps `RackReservation.units`.
-
-Writes run in one `transaction.atomic()` block with row-level locking (`select_for_update`) on the rack, affected devices, and reservations.
-
-## Permission Model
-
-The button is shown only when the current user has all required permissions:
-
-- `dcim.change_rack` (object permission on the rack)
-- `dcim.change_device`
-- `dcim.change_rackreservation`
-
-The view enforces the same permissions server-side.
-
-## Data Safety
-
-The toggle updates only:
+When toggled, it updates:
 
 - `Rack.desc_units`
-- `Device.position`
+- `Device.position` (mounted devices only)
 - `RackReservation.units`
 
-Objects are not recreated. IDs, relationships, tags, and `custom_field_data` remain intact.
+No objects are recreated. IDs, relationships, tags, and custom fields remain intact.
+
+## Safety Guarantees
+
+- Changes run inside one `transaction.atomic()` block
+- `select_for_update()` row locks are used for rack, devices, and reservations
+- If any affected object has invalid unit placement, the operation is aborted safely
+- Permissions are enforced both in UI and server-side, including object-level checks for each affected device/reservation
+- Only `POST` is allowed on the action endpoint
+- If permissions are missing, the button is shown as disabled with a tooltip explaining what is missing
 
 ## Compatibility
 
@@ -55,18 +35,40 @@ Objects are not recreated. IDs, relationships, tags, and `custom_field_data` rem
 
 ## Installation
 
-### NetBox Docker (GitHub tag)
+### Option A (recommended): install from a pinned release tag
 
-Create `Dockerfile-Plugins` in `netbox-docker`:
-
-```dockerfile
-FROM netboxcommunity/netbox:v4.5-4.0.0
-RUN /usr/local/bin/uv pip install "git+https://github.com/WF01/netbox-rack-invert@v0.1.2"
+```bash
+<NETBOX_VENV_PYTHON> -m pip install "git+https://github.com/WF01/netbox-rack-invert@v0.1.2"
 ```
 
-Point `netbox`, `netbox-worker`, and `netbox-housekeeping` to this Dockerfile in your compose override.
+### Option B: install from `main`
 
-Enable plugin in `configuration/plugins.py`:
+```bash
+<NETBOX_VENV_PYTHON> -m pip install "git+https://github.com/WF01/netbox-rack-invert@main"
+```
+
+### Option C: install via requirements file
+
+```bash
+<NETBOX_VENV_PYTHON> -m pip install \
+  -r https://raw.githubusercontent.com/WF01/netbox-rack-invert/main/requirements/netbox-plugin.txt
+```
+
+### Option D: helper installer script
+
+```bash
+NETBOX_ROOT=<NETBOX_ROOT> ./scripts/install-netbox-plugin.sh
+```
+
+To persist plugin installation across NetBox upgrades:
+
+```bash
+PERSIST_LOCAL_REQUIREMENTS=1 NETBOX_ROOT=<NETBOX_ROOT> ./scripts/install-netbox-plugin.sh
+```
+
+## Enable Plugin
+
+Add to `configuration/plugins.py`:
 
 ```python
 PLUGINS = [
@@ -78,89 +80,104 @@ PLUGINS_CONFIG = {
 }
 ```
 
-Build and start:
+Then run:
+
+```bash
+<NETBOX_VENV_PYTHON> <NETBOX_MANAGE_PY> migrate
+<NETBOX_VENV_PYTHON> <NETBOX_MANAGE_PY> collectstatic --no-input
+systemctl restart netbox netbox-rq
+```
+
+## Docker Install
+
+Use a plugin Dockerfile and install from Git:
+
+```dockerfile
+FROM netboxcommunity/netbox:v4.5-4.0.0
+RUN /usr/local/bin/uv pip install "git+https://github.com/WF01/netbox-rack-invert@v0.1.2"
+```
+
+Then rebuild and start:
 
 ```bash
 docker compose build --no-cache
 docker compose up -d
 ```
 
-### NetBox Docker (local source checkout)
-
-Place this repo at `netbox-docker/plugins/netbox-rack-inverter`, then use:
-
-```dockerfile
-FROM netboxcommunity/netbox:v4.5-4.0.0
-RUN rm -rf /plugins/netbox-rack-inverter
-COPY ./plugins /plugins
-RUN /usr/local/bin/uv pip install -e /plugins/netbox-rack-inverter
-```
-
-The `rm -rf` step avoids stale deleted files persisting between rebuilds.
-
-### Non-Docker NetBox
-
-Install into NetBox venv:
-
-```bash
-/opt/netbox/venv/bin/python -m pip install "git+https://github.com/WF01/netbox-rack-invert@v0.1.2"
-```
-
-Enable plugin config (same `PLUGINS` / `PLUGINS_CONFIG` block), then:
-
-```bash
-/opt/netbox/venv/bin/python /opt/netbox/netbox/manage.py migrate
-systemctl restart netbox netbox-rq
-```
-
 ## Offline / Air-Gapped Install
 
-Build artifacts on an internet-connected machine:
+Build wheel:
 
 ```bash
 python -m pip install --upgrade build
 python -m build
 ```
 
-Install wheel on target host:
+Install wheel:
 
 ```bash
-/opt/netbox/venv/bin/python -m pip install /path/to/netbox_rack_inverter-0.1.2-py3-none-any.whl
+<NETBOX_VENV_PYTHON> -m pip install /path/to/netbox_rack_inverter-0.1.2-py3-none-any.whl
 ```
 
-Then enable plugin config, run migrations, and restart services.
+Then enable the plugin and run migrations as shown above.
 
-## Usage
+## Permissions Required
+
+- `dcim.view_rack` on the rack
+- `dcim.change_rack` on the rack
+- `dcim.change_device` on each affected device
+- `dcim.change_rackreservation` on each affected reservation
+
+If any required permission is missing, the action is denied.
+Users with `dcim.view_rack` but missing required change permissions will see a disabled action button with a tooltip that lists missing permissions.
+
+## Scope and Limits
+
+- The action button appears only on rack detail pages
+- No standalone plugin CRUD views
+- No standalone plugin REST API endpoints
+- Remap scope is intentionally narrow (`Device.position`, `RackReservation.units`)
+
+## Use
 
 1. Open a rack detail page.
 2. Click `Switch to Descending Units` or `Switch to Ascending Units`.
 3. Confirm.
 
-Toggling again returns to the previous numbering orientation with physical layout preserved.
+Running the action again toggles back to the previous orientation.
+
+## Migration Notes
+
+This plugin intentionally defines no custom models.
+
+Compatibility migrations include safe legacy cleanup behavior:
+
+- Fresh installs create no plugin model tables
+- Legacy scaffold tables are removed only when empty
+- Non-empty legacy scaffold tables are left untouched to avoid destructive changes
+
+## Testing
+
+Run the full plugin suite:
+
+```bash
+<NETBOX_VENV_PYTHON> <NETBOX_MANAGE_PY> test netbox_rack_inverter.tests -v 2
+```
+
+Latest verified run (February 14, 2026): `46 passed, 0 failed`.
 
 ## Caveats
 
-- Remap scope is currently:
-  - `Device.position`
-  - `RackReservation.units`
-- Other rack-unit-positioned object types are not remapped.
-- Back up your NetBox database before bulk changes.
+This plugin is intentionally narrow: it only toggles rack unit orientation and remaps `Device.position` plus `RackReservation.units` to preserve physical placement.
 
-## Test Coverage
+Before using in production:
 
-Current automated coverage includes:
+- Test on dummy/non-production data first
+- Back up your NetBox database
+- Verify the acting user has all required permissions (including object-level permissions)
+- Validate rack data quality (invalid existing positions/reservations will cause safe aborts)
 
-- Round-trip toggle on mixed `1U` / `2U` / `4U` devices
-- Non-default `starting_unit`
-- Racks with reservations and without reservations
-- Reversible remap logic
-- Preservation of device relationships and custom field data
-- Rack-only button rendering and permission-gated visibility
-
-Latest local run (February 14, 2026):
-
-- Command: `python /opt/netbox/netbox/manage.py test netbox_rack_inverter.tests -v 2`
-- Result: `24 passed, 0 failed`
+The action is designed to be safe and non-destructive, but any bulk positional change should still be treated as an operational change.
 
 ## License
 

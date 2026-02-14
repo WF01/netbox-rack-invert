@@ -430,12 +430,3 @@ __marimo__/
 # Release-only repo hygiene
 .devcontainer/
 .hooks/
-docs/
-mkdocs.yml
-requirements_dev.txt
-TESTING.md
-tests/
-testing/
-.pre-commit-config.yaml
-.pypirc
-template-extensions.py

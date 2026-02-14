@@ -69,18 +69,16 @@ Ready to contribute? Here's how to set up `netbox-rack-inverter` for local devel
     $ git clone git@github.com:your_name_here/netbox-rack-inverter.git
     ```
 
-3. Activate the NetBox virtual environment (see the NetBox documentation under [Setting up a Development Environment](https://docs.netbox.dev/en/stable/development/getting-started/)):
+3. Activate the NetBox virtual environment (see the NetBox documentation under [Setting up a Development Environment](https://netboxlabs.com/docs/netbox/development/)):
 
     ```
     $ source ~/.venv/netbox/bin/activate
     ```
 
-4. Add the plugin to NetBox virtual environment in Develop mode (see [Plugins Development](https://docs.netbox.dev/en/stable/plugins/development/)):
-
-    To ease development, it is recommended to go ahead and install the plugin at this point using setuptools' develop mode. This will create symbolic links within your Python environment to the plugin development directory. Call setup.py from the plugin's root directory with the develop argument (instead of install):
+4. Install the plugin in editable mode:
 
     ```
-    $ python setup.py develop
+    $ python -m pip install -e .
     ```
 
 5. Create a branch for local development:

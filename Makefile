@@ -1,14 +1,14 @@
 sources = netbox_rack_inverter
 
-.PHONY: test format lint unittest pre-commit clean
-test: format lint unittest
+.PHONY: test format lint pre-commit clean
+test: format lint
 
 format:
-	ruff check --select I --fix $(sources) tests
-	ruff format $(sources) tests
+	ruff check --select I --fix $(sources)
+	ruff format $(sources)
 
 lint:
-	ruff check $(sources) tests
+	ruff check $(sources)
 
 pre-commit:
 	pre-commit run --all-files

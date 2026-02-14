@@ -4,7 +4,7 @@ Netbox Rack Inverter
 Plugin configuration for Netbox Rack Inverter.
 
 For a complete list of PluginConfig attributes, see:
-https://docs.netbox.dev/en/stable/plugins/development/#pluginconfig-attributes
+https://netboxlabs.com/docs/netbox/plugins/development/plugin-config/
 """
 
 __author__ = """Sam Richardson"""
@@ -15,7 +15,7 @@ __version__ = "0.1.2"
 from netbox.plugins import PluginConfig
 
 
-class Rack_InverterConfig(PluginConfig):
+class RackInverterConfig(PluginConfig):
     name = "netbox_rack_inverter"
     verbose_name = "Netbox Rack Inverter"
     description = "Maintains physical position while changing rack order"
@@ -26,5 +26,4 @@ class Rack_InverterConfig(PluginConfig):
     min_version = "4.5.0"
     max_version = "4.5.99"
 
-
-config = Rack_InverterConfig
+config = RackInverterConfig
