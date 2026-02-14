@@ -1,13 +1,14 @@
 ![header](https://raw.githubusercontent.com/free-whiteboard-online/Free-Erasorio-Alternative-for-Collaborative-Design/ffe094ad1d3ac054adccb854631a82ec5816ddd7/uploads/2026-02-13T14-26-33-645Z-t3g8wjwee.gif)
 
-`netbox-rack-inverter` flips rack numbering direction (`ascending <-> descending`) while preserving physical rack layout (i.e., reorders devices to maintain their 'physical location'
+`netbox-rack-inverter` flips rack numbering direction (`ascending <-> descending`) while preserving physical rack layout (i.e., reorders devices to maintain their 'physical location').
+
+In theory works with all rack sizes, device sizes and is non-destructive. May fix bugs if there's any interest.
 
 ## Demo
 
 ![header](https://raw.githubusercontent.com/free-whiteboard-online/Free-Erasorio-Alternative-for-Collaborative-Design/41a949c9c76ba03c2681d6810038890ea0c74264/uploads/2026-02-13T14-27-29-566Z-st51dm5t5.gif)
 
-Allows rack inversion through transforming device (RUs) - designed to work with all RU / rack sizes.
-Largely untested - please use at your own risk; tested on a local docker instance without issue.
+Grayed out if a permissions issue exists, otherwise allows a user to toggle individual racks via their [rackid] page.
 
 ## What It Does
 
