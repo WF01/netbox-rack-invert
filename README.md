@@ -52,7 +52,14 @@ The action is designed to be safe and non-destructive, but any bulk positional c
 
 ## Installation
 
-### Option A (recommended): install from a pinned release tag
+### Before you start
+
+- Use the **same Python virtualenv** that NetBox itself runs under.
+- Typical Linux values are:
+  - `NETBOX_VENV_PYTHON=/opt/netbox/venv/bin/python`
+  - `NETBOX_MANAGE_PY=/opt/netbox/netbox/manage.py`
+
+### Option A (recommended): install a pinned release tag
 
 ```bash
 <NETBOX_VENV_PYTHON> -m pip install "git+https://github.com/WF01/netbox-rack-invert@v0.1.3"
@@ -67,14 +74,32 @@ The action is designed to be safe and non-destructive, but any bulk positional c
 ### Option C: install via requirements file
 
 ```bash
-<NETBOX_VENV_PYTHON> -m pip install \
-  -r https://raw.githubusercontent.com/WF01/netbox-rack-invert/main/requirements/netbox-plugin.txt
+<NETBOX_VENV_PYTHON> -m pip install   -r https://raw.githubusercontent.com/WF01/netbox-rack-invert/main/requirements/netbox-plugin.txt
 ```
 
-### Option D: helper installer script
+### Option D: helper installer script (best for path auto-detection)
 
 ```bash
-NETBOX_ROOT=<NETBOX_ROOT> ./scripts/install-netbox-plugin.sh
+bash ./scripts/install-netbox-plugin.sh
+```
+
+What the installer does:
+
+- Detects Python in common NetBox locations:
+  - `${NETBOX_ROOT}/venv/bin/python`
+  - `/opt/netbox/venv/bin/python`
+  - `/usr/local/netbox/venv/bin/python`
+  - then `python3` / `python` as a last fallback
+- Detects `manage.py` in:
+  - `${NETBOX_ROOT}/netbox/manage.py`
+  - `/opt/netbox/netbox/manage.py`
+  - `/usr/local/netbox/netbox/manage.py`
+- Installs from `requirements/netbox-plugin.txt` by default.
+
+If your layout is non-standard, force explicit paths:
+
+```bash
+NETBOX_PYTHON=<NETBOX_VENV_PYTHON> NETBOX_MANAGE_PY=<NETBOX_MANAGE_PY> NETBOX_ROOT=<NETBOX_ROOT> ./scripts/install-netbox-plugin.sh
 ```
 
 To persist plugin installation across NetBox upgrades:
