@@ -35,3 +35,19 @@ Run a single test module:
 - Permission enforcement (including constrained object permissions)
 - No changes to unrelated racks or unpositioned devices
 
+
+## Installer Validation
+
+To validate installer behavior without a full NetBox deployment, run:
+
+```bash
+bash ./scripts/test-install-netbox-plugin.sh
+```
+
+This covers:
+
+- Auto-detection success using a simulated NetBox layout
+- Explicit `NETBOX_PYTHON` / `NETBOX_MANAGE_PY` override success
+- `uv` fallback path when `pip` is unavailable
+- Failure mode and actionable message when `manage.py` is missing
+- `PERSIST_LOCAL_REQUIREMENTS` idempotency (no duplicate entries)
