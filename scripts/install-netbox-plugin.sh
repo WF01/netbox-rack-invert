@@ -5,10 +5,38 @@ NETBOX_ROOT="${NETBOX_ROOT:-/opt/netbox}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DEFAULT_REQUIREMENT_FILE="${SCRIPT_DIR}/../requirements/netbox-plugin.txt"
 REQUIREMENT_FILE="${REQUIREMENT_FILE:-${DEFAULT_REQUIREMENT_FILE}}"
-PYTHON_BIN="${NETBOX_PYTHON:-${NETBOX_ROOT}/venv/bin/python}"
-MANAGE_PY="${NETBOX_MANAGE_PY:-${NETBOX_ROOT}/netbox/manage.py}"
+PYTHON_BIN="${NETBOX_PYTHON:-}"
+MANAGE_PY="${NETBOX_MANAGE_PY:-}"
 PERSIST_LOCAL_REQUIREMENTS="${PERSIST_LOCAL_REQUIREMENTS:-0}"
 LOCAL_REQUIREMENTS_FILE="${NETBOX_LOCAL_REQUIREMENTS:-${NETBOX_ROOT}/local_requirements.txt}"
+
+find_first_existing() {
+  for candidate in "$@"; do
+    if [[ -n "${candidate}" && -e "${candidate}" ]]; then
+      echo "${candidate}"
+      return 0
+    fi
+  done
+  return 1
+}
+
+if [[ -z "${PYTHON_BIN}" ]]; then
+  PYTHON_BIN="$(find_first_existing \
+    "${NETBOX_ROOT}/venv/bin/python" \
+    "/opt/netbox/venv/bin/python" \
+    "/usr/local/netbox/venv/bin/python" \
+    "$(command -v python3 2>/dev/null || true)" \
+    "$(command -v python 2>/dev/null || true)" \
+  )" || true
+fi
+
+if [[ -z "${MANAGE_PY}" ]]; then
+  MANAGE_PY="$(find_first_existing \
+    "${NETBOX_ROOT}/netbox/manage.py" \
+    "/opt/netbox/netbox/manage.py" \
+    "/usr/local/netbox/netbox/manage.py" \
+  )" || true
+fi
 
 if [[ ! -f "${REQUIREMENT_FILE}" ]]; then
   echo "Requirement file not found: ${REQUIREMENT_FILE}" >&2
@@ -21,13 +49,13 @@ if [[ -z "${PACKAGE_SPEC}" ]]; then
   exit 1
 fi
 
-if [[ ! -x "${PYTHON_BIN}" ]]; then
-  echo "NetBox venv python not found: ${PYTHON_BIN}" >&2
+if [[ -z "${PYTHON_BIN}" || ! -x "${PYTHON_BIN}" ]]; then
+  echo "NetBox python executable not found. Set NETBOX_PYTHON explicitly (example: /opt/netbox/venv/bin/python)." >&2
   exit 1
 fi
 
-if [[ ! -f "${MANAGE_PY}" ]]; then
-  echo "manage.py not found: ${MANAGE_PY}" >&2
+if [[ -z "${MANAGE_PY}" || ! -f "${MANAGE_PY}" ]]; then
+  echo "NetBox manage.py not found. Set NETBOX_MANAGE_PY explicitly (example: /opt/netbox/netbox/manage.py)." >&2
   exit 1
 fi
 
