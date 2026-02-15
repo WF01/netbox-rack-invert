@@ -9,7 +9,7 @@ https://netboxlabs.com/docs/netbox/plugins/development/plugin-config/
 
 __author__ = """Sam Richardson"""
 __email__ = "srwfsec@proton.me"
-__version__ = "0.1.3"
+__version__ = "0.1.4"
 
 
 from netbox.plugins import PluginConfig

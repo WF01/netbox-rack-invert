@@ -46,71 +46,130 @@ The action is designed to be safe and non-destructive, but any bulk positional c
 
 ## Compatibility
 
-- Plugin: `0.1.3`
+- Plugin: `0.1.4`
 - NetBox: `4.5.x`
 - Python: `3.12+`
 
 ## Installation
 
-### Before you start
+### Quick choose (pick one)
 
-- Use the **same Python virtualenv** that NetBox itself runs under.
-- Typical Linux values are:
-  - `NETBOX_VENV_PYTHON=/opt/netbox/venv/bin/python`
-  - `NETBOX_MANAGE_PY=/opt/netbox/netbox/manage.py`
+- **Bare-metal / VM NetBox install** (systemd services): use **Path A** or **Path B** below.
+- **netbox-docker**: use **Path C** below (recommended for Docker users).
+- **Air-gapped / offline**: use **Path D** below.
 
-### Option A (recommended): install a pinned release tag
+### Common placeholders
 
-```bash
-<NETBOX_VENV_PYTHON> -m pip install "git+https://github.com/WF01/netbox-rack-invert@v0.1.3"
-```
+- `<NETBOX_VENV_PYTHON>` = Python from the same virtualenv NetBox uses.
+  - Typical: `/opt/netbox/venv/bin/python`
+- `<NETBOX_MANAGE_PY>` = NetBox `manage.py` path.
+  - Typical: `/opt/netbox/netbox/manage.py`
 
-### Option B: install from `main`
+---
 
-```bash
-<NETBOX_VENV_PYTHON> -m pip install "git+https://github.com/WF01/netbox-rack-invert@main"
-```
-
-### Option C: install via requirements file
+### Path A (recommended for bare-metal): pinned tag install
 
 ```bash
-<NETBOX_VENV_PYTHON> -m pip install   -r https://raw.githubusercontent.com/WF01/netbox-rack-invert/main/requirements/netbox-plugin.txt
+<NETBOX_VENV_PYTHON> -m pip install "git+https://github.com/WF01/netbox-rack-invert@v0.1.4"
 ```
 
-### Option D: helper installer script (best for path auto-detection)
+### Path B (bare-metal helper script): auto-detect install
 
 ```bash
-bash ./scripts/install-netbox-plugin.sh
+./scripts/install-netbox-plugin.sh
 ```
 
-What the installer does:
+What the helper script does automatically:
 
-- Detects Python in common NetBox locations:
+- Looks for Python in:
   - `${NETBOX_ROOT}/venv/bin/python`
   - `/opt/netbox/venv/bin/python`
   - `/usr/local/netbox/venv/bin/python`
-  - then `python3` / `python` as a last fallback
-- Detects `manage.py` in:
+  - then `python3` / `python` fallback
+- Looks for `manage.py` in:
   - `${NETBOX_ROOT}/netbox/manage.py`
   - `/opt/netbox/netbox/manage.py`
   - `/usr/local/netbox/netbox/manage.py`
-- Installs from `requirements/netbox-plugin.txt` by default.
+- Installs from `requirements/netbox-plugin.txt`
 
-If your layout is non-standard, force explicit paths:
+If your paths are custom, force explicit values:
 
 ```bash
 NETBOX_PYTHON=<NETBOX_VENV_PYTHON> NETBOX_MANAGE_PY=<NETBOX_MANAGE_PY> NETBOX_ROOT=<NETBOX_ROOT> ./scripts/install-netbox-plugin.sh
 ```
 
-To persist plugin installation across NetBox upgrades:
+To persist plugin install across NetBox upgrades:
 
 ```bash
 PERSIST_LOCAL_REQUIREMENTS=1 NETBOX_ROOT=<NETBOX_ROOT> ./scripts/install-netbox-plugin.sh
 ```
 
-## Enable Plugin
+### Path C (netbox-docker): easiest repeatable setup
 
-Add to `configuration/plugins.py`:
+If `docker compose build` says **"No services to build"**, your compose files are image-only. Add a plugin build layer:
+
+1. Create `plugin_requirements.txt` in your netbox-docker root:
+
+```txt
+git+https://github.com/WF01/netbox-rack-invert@v0.1.4
+```
+
+2. Create `Dockerfile-Plugins` in your netbox-docker root:
+
+```dockerfile
+FROM netboxcommunity/netbox:latest
+COPY plugin_requirements.txt /opt/netbox/plugin_requirements.txt
+RUN /usr/local/bin/uv pip install -r /opt/netbox/plugin_requirements.txt
+```
+
+3. Create or update `docker-compose.override.yml`:
+
+```yaml
+services:
+  netbox:
+    build:
+      context: .
+      dockerfile: Dockerfile-Plugins
+    image: netboxcommunity/netbox:local-plugins
+  netbox-worker:
+    image: netboxcommunity/netbox:local-plugins
+  netbox-housekeeping:
+    image: netboxcommunity/netbox:local-plugins
+```
+
+4. Rebuild/start:
+
+```bash
+docker compose build --no-cache
+docker compose up -d
+```
+
+5. Verify package in container:
+
+```bash
+docker compose exec netbox python -m pip show netbox-rack-inverter
+```
+
+### Path D (offline / air-gapped)
+
+Build wheel on a connected host:
+
+```bash
+python -m pip install --upgrade build
+python -m build
+```
+
+Install wheel on NetBox host:
+
+```bash
+<NETBOX_VENV_PYTHON> -m pip install /path/to/netbox_rack_inverter-0.1.4-py3-none-any.whl
+```
+
+---
+
+### After any installation path: enable + finalize
+
+1. Add plugin to `configuration/plugins.py`:
 
 ```python
 PLUGINS = [
@@ -122,46 +181,31 @@ PLUGINS_CONFIG = {
 }
 ```
 
-Then run:
+2. Apply migrations/static:
 
 ```bash
 <NETBOX_VENV_PYTHON> <NETBOX_MANAGE_PY> migrate
 <NETBOX_VENV_PYTHON> <NETBOX_MANAGE_PY> collectstatic --no-input
-systemctl restart netbox netbox-rq
 ```
 
-## Docker Install
+3. Restart services:
 
-Use a plugin Dockerfile and install from Git:
+- Bare-metal: `systemctl restart netbox netbox-rq`
+- Docker: `docker compose restart netbox netbox-worker netbox-housekeeping`
 
-```dockerfile
-FROM netboxcommunity/netbox:v4.5-4.0.0
-RUN /usr/local/bin/uv pip install "git+https://github.com/WF01/netbox-rack-invert@v0.1.3"
-```
+### Post-install smoke checks
 
-Then rebuild and start:
+- Package installed:
+  - Bare-metal: `<NETBOX_VENV_PYTHON> -m pip show netbox-rack-inverter`
+  - Docker: `docker compose exec netbox python -m pip show netbox-rack-inverter`
+- Plugin loaded: check NetBox/worker logs for startup errors.
+- UI check: open a rack page and confirm the toggle action appears.
+
+### Optional validation tests
 
 ```bash
-docker compose build --no-cache
-docker compose up -d
+<NETBOX_VENV_PYTHON> <NETBOX_MANAGE_PY> test netbox_rack_inverter.tests -v 2
 ```
-
-## Offline / Air-Gapped Install
-
-Build wheel:
-
-```bash
-python -m pip install --upgrade build
-python -m build
-```
-
-Install wheel:
-
-```bash
-<NETBOX_VENV_PYTHON> -m pip install /path/to/netbox_rack_inverter-0.1.3-py3-none-any.whl
-```
-
-Then enable the plugin and run migrations as shown above.
 
 ## Permissions Required
 
@@ -200,13 +244,31 @@ Compatibility migrations include safe legacy cleanup behavior:
 
 ## Testing
 
-Run the full plugin suite:
+### 1) Installer smoke tests (fast, no live NetBox required)
+
+These validate installer behavior such as path auto-detection, explicit overrides, `uv` fallback, clear failure messaging, and persistence idempotency.
+
+```bash
+bash ./testing/test_install_script.sh
+```
+
+Or:
+
+```bash
+make test-install-script
+```
+
+### 2) Full plugin test suite (requires NetBox environment)
 
 ```bash
 <NETBOX_VENV_PYTHON> <NETBOX_MANAGE_PY> test netbox_rack_inverter.tests -v 2
 ```
 
-Latest verified run (February 14, 2026): `46 passed, 0 failed`.
+### 3) Single-module test run (optional)
+
+```bash
+<NETBOX_VENV_PYTHON> <NETBOX_MANAGE_PY> test netbox_rack_inverter.tests.test_toggle_units_order -v 2
+```
 
 ## License
 
