@@ -35,3 +35,17 @@ Run a single test module:
 - Permission enforcement (including constrained object permissions)
 - No changes to unrelated racks or unpositioned devices
 
+
+## Installer Smoke Tests
+
+These tests validate `scripts/install-netbox-plugin.sh` behavior without a full NetBox runtime by stubbing Python/manage.py and asserting expected success/failure paths.
+
+```bash
+bash ./testing/test_install_script.sh
+```
+
+Or via Make:
+
+```bash
+make test-install-script
+```

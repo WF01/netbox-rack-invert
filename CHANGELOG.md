@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.4] - 2026-02-15
+
+### Added
+- Added installer smoke-test coverage in `testing/test_install_script.sh` for auto-detection, explicit path overrides, `uv` fallback, clear missing `manage.py` failures, and idempotent `local_requirements.txt` persistence behavior.
+- Added `make test-install-script` to run installer smoke tests in one command.
+
+### Changed
+- Reworked installation documentation into environment-focused playbooks (bare-metal, netbox-docker, and offline) with clearer placeholders and post-install verification steps.
+- Refreshed README testing guidance to separate fast installer checks from full NetBox integration tests.
+- Bumped release version to `0.1.4` and updated pinned installation references.
+
 ## [0.1.3] - 2026-02-14
 
 ### Fixed
